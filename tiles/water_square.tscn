@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://v1f0hwao5jwc"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="WaterSquare" type="Polygon2D" parent="."]
+position = Vector2(-8, -8)
+color = Color(0.34902, 0.866667, 1, 1)
+polygon = PackedVector2Array(0, 0, 0, 16, 16, 16, 16, 0)
+
+[node name="Line2D" type="Line2D" parent="WaterSquare"]
+points = PackedVector2Array(0, 0, 0, 16, 16, 16, 16, 0)
+closed = true
+width = 1.0
+default_color = Color(0.262932, 0.262932, 0.262932, 1)

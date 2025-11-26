@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="Enemy" load_steps=2 format=3 uid="uid://dyqqwy8xrtbe6"]
+
+[ext_resource type="Script" uid="uid://0jcjgnc4us73" path="res://enemy_spec.gd" id="1_j13lc"]
+
+[resource]
+script = ExtResource("1_j13lc")
+name = &"Slime"
+tags = Dictionary[int, int]({
+0: 0,
+1: 0
+})
+color = Color(0, 0.6666667, 0, 1)
+metadata/_custom_type_script = "uid://0jcjgnc4us73"

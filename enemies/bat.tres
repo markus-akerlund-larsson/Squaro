@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EnemySpec" load_steps=2 format=3 uid="uid://c2woj0gddghop"]
+
+[ext_resource type="Script" uid="uid://0jcjgnc4us73" path="res://enemy_spec.gd" id="1_s3307"]
+
+[resource]
+script = ExtResource("1_s3307")
+name = &"Bat"
+tags = Dictionary[int, int]({
+2: 0,
+4: 0
+})
+color = Color(0, 0, 0.5411765, 1)
+metadata/_custom_type_script = "uid://0jcjgnc4us73"

@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://cp18suicdpt4m"]
+
+[ext_resource type="Script" uid="uid://b46umebjup2s3" path="res://player.gd" id="1_4flbx"]
+
+[node name="Player" type="Node2D"]
+visibility_layer = 3
+z_index = 1
+script = ExtResource("1_4flbx")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+position = Vector2(-8, -8)
+color = Color(0.5380475, 0.70924056, 0.85318536, 1)
+polygon = PackedVector2Array(4, 0, 4, 12, 12, 12, 12, 0)

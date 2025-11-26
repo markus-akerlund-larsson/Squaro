@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://c08ium58kbwal"]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="EmptySquare" type="Polygon2D" parent="."]
+position = Vector2(-8, -8)
+color = Color(0.92110735, 0.8570677, 0.80060065, 1)
+polygon = PackedVector2Array(0, 0, 0, 16, 16, 16, 16, 0)
+
+[node name="Line2D" type="Line2D" parent="EmptySquare"]
+points = PackedVector2Array(0, 0, 0, 16, 16, 16, 16, 0)
+closed = true
+width = 1.0
+default_color = Color(0.26293245, 0.26293245, 0.26293245, 1)
