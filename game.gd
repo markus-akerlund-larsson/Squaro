@@ -30,7 +30,7 @@ func _ready() -> void:
 	var mapData: Array[StringName] = []
 	mapData.resize(65*69)
 	mapData.fill(&"Water")
-	state.map = MapState.new(65, 69, mapData)
+	state.map = Map.new(65, 69, mapData)
 	for x in range(30, 35):
 		for y in range(30, 39):
 			state.map.set_tile_xy(x, y, &"Ground")
@@ -63,7 +63,7 @@ func _process(_delta: float) -> void:
 func _receive_input() -> void:
 	var tile = map.local_to_map(get_global_mouse_position())
 	
-	if(not PlayerState.validMove(tile, _history[-1].state)):
+	if(not Player.validMove(tile, _history[-1].state)):
 		return
 		
 	if Input.is_action_pressed(&"game_move"):
@@ -94,13 +94,13 @@ func _spawn_enemy(p_state: GameState, type: EnemySpec, pos: Vector2i) -> Update:
 	var scene = _enemyScene.instantiate()
 	enemiesNode.add_child(scene)
 	
-	var enemyState = EnemyState.new()
+	var enemyState = Enemy.new()
 	enemyState.position = pos
 	enemyState.id = _unusedIdentifier
 	_unusedIdentifier += 1
 
 	enemyState.name = type.name
-	enemyState.tags = type.tags.duplicate()
+	enemyState.tag = type.tags.duplicate()
 	
 	state.enemies.append(enemyState)
 	

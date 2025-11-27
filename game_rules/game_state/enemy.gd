@@ -1,4 +1,4 @@
-class_name EnemyState
+class_name Enemy
 extends Resource
 
 #Careful, only add new Tags and Statuses at the end or resources break
@@ -8,12 +8,12 @@ enum Status {RETREATING, FROZEN, RESTING, BUMPED}
 @export var id: int
 @export var name: String
 @export var position: Vector2i
-@export var tags: Dictionary[Tag, int]
+@export var tag: Dictionary[Tag, int]
 @export var status: Dictionary[Status, int]
 
-func _init(p_id: int = 0, p_name: String = "", p_position: Vector2i = Vector2i.ZERO, p_tags: Dictionary[Tag, int] = {}, p_status: Dictionary[Status, int] = {}):
+func _init(p_id: int = 0, p_name: String = "", p_position: Vector2i = Vector2i.ZERO, p_tag: Dictionary[Tag, int] = {}, p_status: Dictionary[Status, int] = {}):
 	id = p_id
 	name = p_name
 	position = p_position
-	tags = p_tags
+	tag = p_tag
 	status = p_status

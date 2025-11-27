@@ -1,4 +1,4 @@
-class_name MapState
+class_name Map
 extends Resource
 
 @export var width: int

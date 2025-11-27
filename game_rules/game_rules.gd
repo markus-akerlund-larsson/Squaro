@@ -13,15 +13,15 @@ static func player_bump(p_state: GameState, target: Vector2i) -> Update:
 	var endTile = enemy.position+dir
 	if state.blocked_tile(endTile): return null
 	enemy.position = endTile
-	if enemy.tags.has(EnemyState.Tag.FLYING):
+	if enemy.tags.has(Enemy.Tag.FLYING):
 		if !state.blocked_tile(endTile+dir):
 			endTile += dir
 			enemy.position = endTile
 		
-	enemy.status[EnemyState.Status.BUMPED] = 0
+	enemy.status[Enemy.Status.BUMPED] = 0
 	actions.append(BumpAction.new(enemy.id, endTile))
 	
-	if state.map.get_tile(endTile) == &"Water" and !enemy.tags.has(EnemyState.Tag.FLYING):
+	if state.map.get_tile(endTile) == &"Water" and !enemy.tags.has(Enemy.Tag.FLYING):
 		state.enemies.erase(enemy)
 		state.map.set_tile(endTile, &"Ground")
 		actions.append(SinkEnemyAction.new(enemy.id, endTile))
@@ -43,55 +43,55 @@ static func enemy_turn(actions: Array[Action], p_state: GameState) -> Update:
 	state.enemies.shuffle()
 	state.enemies.sort_custom(func(a, b): _enemy_distance_sort(a, b, state.player.position))
 	
-	for enemy: EnemyState in state.enemies:
+	for enemy: Enemy in state.enemies:
 		# Enemy turn logic goes here
 		
 		var dir = _select_enemy_dir(state, enemy)
 		
-		if MapState.gridDistance(state.player.position, enemy.position) == 1:
+		if Map.gridDistance(state.player.position, enemy.position) == 1:
 			actions.append_array(_enemy_attack(state, enemy))
 		
-		if enemy.status.has(EnemyState.Status.RESTING):
+		if enemy.status.has(Enemy.Status.RESTING):
 			dir = Vector2i.ZERO
 		
-		if _valid_enemy_move(state, enemy, enemy.position+dir) and not enemy.status.has(EnemyState.Status.BUMPED):
+		if _valid_enemy_move(state, enemy, enemy.position+dir) and not enemy.status.has(Enemy.Status.BUMPED):
 			enemy.position += dir
 			actions.append(MoveAction.new(enemy.id, enemy.position))
 			
-		if enemy.tags.has(EnemyState.Tag.FLYING) and not enemy.status.has(EnemyState.Status.BUMPED):
+		if enemy.tag.has(Enemy.Tag.FLYING) and not enemy.status.has(Enemy.Status.BUMPED):
 			dir = _select_enemy_dir(state, enemy)
 			if _valid_enemy_move(state, enemy, enemy.position+dir):
 				print(str(dir))
 				enemy.position += dir
 				actions.append(MoveAction.new(enemy.id, enemy.position))
 				
-		_count_down_status(enemy, EnemyState.Status.RESTING)
-		_count_down_status(enemy, EnemyState.Status.RETREATING)
-		_count_down_status(enemy, EnemyState.Status.BUMPED)
+		_count_down_status(enemy, Enemy.Status.RESTING)
+		_count_down_status(enemy, Enemy.Status.RETREATING)
+		_count_down_status(enemy, Enemy.Status.BUMPED)
 			
 	return Update.new(actions, state)
 	
-static func _enemy_attack(state: GameState, enemy: EnemyState) -> Array[Action]:
+static func _enemy_attack(state: GameState, enemy: Enemy) -> Array[Action]:
 	var actions: Array[Action] = []
-	if(!enemy.tags.has(EnemyState.Tag.HARMLESS)):
+	if(!enemy.tag.has(Enemy.Tag.HARMLESS)):
 		state.player.health -= 1
 		actions.append(PlayerDamageAction.new(state.player.health))
-	if(enemy.tags.has(EnemyState.Tag.HIT_AND_RUN)):
-		enemy.status[EnemyState.Status.RETREATING] = 3
-	if(enemy.tags.has(EnemyState.Tag.COOLDOWN)):
-		enemy.status[EnemyState.Status.RESTING] = 3
+	if(enemy.tag.has(Enemy.Tag.HIT_AND_RUN)):
+		enemy.status[Enemy.Status.RETREATING] = 3
+	if(enemy.tag.has(Enemy.Tag.COOLDOWN)):
+		enemy.status[Enemy.Status.RESTING] = 3
 	return actions
 	
 	
-static func _enemy_distance_sort(a: EnemyState, b: EnemyState, position: Vector2i) -> bool:
-	return MapState.gridDistance(a.position, position) > MapState.gridDistance(b.position, position)
+static func _enemy_distance_sort(a: Enemy, b: Enemy, position: Vector2i) -> bool:
+	return Map.gridDistance(a.position, position) > Map.gridDistance(b.position, position)
 	
-static func _valid_enemy_move(state: GameState, enemy: EnemyState, pos: Vector2i) -> bool:
+static func _valid_enemy_move(state: GameState, enemy: Enemy, pos: Vector2i) -> bool:
 	return (enemy.position != pos
-			and (state.map.get_tile(pos) == &"Ground" or (enemy.tags.has(EnemyState.Tag.FLYING) and state.map.get_tile(pos) == &"Water"))
+			and (state.map.get_tile(pos) == &"Ground" or (enemy.tag.has(Enemy.Tag.FLYING) and state.map.get_tile(pos) == &"Water"))
 			and not state.blocked_tile(pos))
 			
-static func _select_enemy_dir(state: GameState, enemy: EnemyState) -> Vector2i:
+static func _select_enemy_dir(state: GameState, enemy: Enemy) -> Vector2i:
 		var playerDir = state.player.position - enemy.position
 		var dir: Vector2i
 		var alternate := Vector2i.ZERO
@@ -111,7 +111,7 @@ static func _select_enemy_dir(state: GameState, enemy: EnemyState) -> Vector2i:
 			else:
 				dir = Vector2i(0, sign(playerDir).y)
 		
-		if enemy.status.has(EnemyState.Status.RETREATING):
+		if enemy.status.has(Enemy.Status.RETREATING):
 			dir = -dir
 			alternate = -alternate
 		
@@ -120,7 +120,7 @@ static func _select_enemy_dir(state: GameState, enemy: EnemyState) -> Vector2i:
 			
 		return dir
 		
-static func _count_down_status(enemy: EnemyState, status: EnemyState.Status) -> void:
+static func _count_down_status(enemy: Enemy, status: Enemy.Status) -> void:
 	if enemy.status.has(status):
 		enemy.status[status] -= 1
 		if enemy.status[status] < 1:
