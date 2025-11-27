@@ -11,7 +11,7 @@ func _init(id: int, tile: Vector2i) -> void:
 func execute(game: Node2D):
 	game.map.update(game._history[-1].state)
 	var enemy = game.entities[_id]
-	game.enemiesNode.remove_child(enemy)
+	game.enemies_node.remove_child(enemy)
 	enemy.queue_free()
 	game.entities.erase(_id)
 	

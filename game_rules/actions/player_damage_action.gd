@@ -7,6 +7,6 @@ func _init(health: int) -> void:
 	_health = health
 	
 func execute(game: Node2D):
-	game.healthDisplay.text = "Health: "+str(_health)
+	game.health_display.text = "Health: "+str(_health)
 
 	

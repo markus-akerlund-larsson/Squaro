@@ -2,14 +2,14 @@ extends Node2D
 
 @onready var map = $TileMapLayer
 @onready var player = $TileMapLayer/Player
-@onready var enemiesNode = $TileMapLayer/Enemies
-@onready var playerPreview = $TileMapLayer/PlayerGhost
-@onready var healthDisplay = $TileMapLayer/Player/Camera2D/CanvasLayer/Label
+@onready var enemies_node = $TileMapLayer/Enemies
+@onready var player_preview = $TileMapLayer/PlayerGhost
+@onready var health_display = $TileMapLayer/Player/Camera2D/CanvasLayer/Label
 
 var _history: Array[Update] = []
-var _enemyScene: Resource
+var _enemy_scene: Resource
 var _enemies: Dictionary[StringName, EnemySpec]
-var _unusedIdentifier: int = 2
+var _unused_id: int = 2
 
 enum {AWAITING_INPUT, RESOLVING_ACTIONS}
 
@@ -21,7 +21,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	var state = GameState.new()
-	_enemyScene = load("res://enemy.tscn")
+	_enemy_scene = load("res://enemy.tscn")
 	
 	# Obviously the rest of this function should happen in a level generator
 	# in the future
@@ -54,7 +54,7 @@ func _ready() -> void:
 	_history.append(Update.new([], state))
 
 func _process(_delta: float) -> void:
-	playerPreview.visible = false
+	player_preview.visible = false
 	# Will this get complex enough later to justify state machine objects?
 	match input_state:
 		AWAITING_INPUT:
@@ -67,8 +67,8 @@ func _receive_input() -> void:
 		return
 		
 	if Input.is_action_pressed(&"game_move"):
-		playerPreview.position = map.map_to_local(tile)
-		playerPreview.visible = true
+		player_preview.position = map.map_to_local(tile)
+		player_preview.visible = true
 		
 	if Input.is_action_just_released(&"game_move"):
 		if _history[-1].state.enemy_tile(tile):
@@ -90,13 +90,13 @@ func _receive_input() -> void:
 
 func _spawn_enemy(p_state: GameState, type: EnemySpec, pos: Vector2i) -> Update:
 	var state = p_state.duplicate(true)
-	var scene = _enemyScene.instantiate()
-	enemiesNode.add_child(scene)
+	var scene = _enemy_scene.instantiate()
+	enemies_node.add_child(scene)
 	
 	var enemyState = Enemy.new()
 	enemyState.position = pos
-	enemyState.id = _unusedIdentifier
-	_unusedIdentifier += 1
+	enemyState.id = _unused_id
+	_unused_id += 1
 
 	enemyState.name = type.name
 	enemyState.tag = type.tags.duplicate()
