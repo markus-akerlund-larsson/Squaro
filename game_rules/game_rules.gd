@@ -49,46 +49,45 @@ static func enemy_turn(actions: Array[Action], p_state: GameState) -> Update:
 		var dir = _select_enemy_dir(state, enemy)
 		
 		if MapState.gridDistance(state.player.position, enemy.position) == 1:
-			# attacking code here
-			if(!enemy.tags.has(EnemyState.Tag.HARMLESS)):
-				state.player.health -= 1
-				actions.append(PlayerDamageAction.new(state.player.health))
-			if(enemy.tags.has(EnemyState.Tag.HIT_AND_RUN)):
-				enemy.status[EnemyState.Status.RETREATING] = 3
-			if(enemy.tags.has(EnemyState.Tag.COOLDOWN)):
-				enemy.status[EnemyState.Status.RESTING] = 3
-				
-		if enemy.status.has(EnemyState.Status.BUMPED):
-			enemy.status.erase(EnemyState.Status.BUMPED)
-			dir = Vector2i.ZERO
+			actions.append_array(_enemy_attack(state, enemy))
 		
 		if enemy.status.has(EnemyState.Status.RESTING):
-			enemy.status[EnemyState.Status.RESTING] -= 1
 			dir = Vector2i.ZERO
-			if enemy.status[EnemyState.Status.RESTING] < 1:
-				enemy.status.erase(EnemyState.Status.RESTING)
 		
-		if _valid_enemy_move(state, enemy, enemy.position+dir):
+		if _valid_enemy_move(state, enemy, enemy.position+dir) and not enemy.status.has(EnemyState.Status.BUMPED):
 			enemy.position += dir
 			actions.append(MoveAction.new(enemy.id, enemy.position))
 			
-		if enemy.tags.has(EnemyState.Tag.FLYING):
-			print("flying")
+		if enemy.tags.has(EnemyState.Tag.FLYING) and not enemy.status.has(EnemyState.Status.BUMPED):
 			dir = _select_enemy_dir(state, enemy)
 			if _valid_enemy_move(state, enemy, enemy.position+dir):
 				print(str(dir))
 				enemy.position += dir
 				actions.append(MoveAction.new(enemy.id, enemy.position))
+				
+		_count_down_status(enemy, EnemyState.Status.RESTING)
+		_count_down_status(enemy, EnemyState.Status.RETREATING)
+		_count_down_status(enemy, EnemyState.Status.BUMPED)
 			
-	
 	return Update.new(actions, state)
+	
+static func _enemy_attack(state: GameState, enemy: EnemyState) -> Array[Action]:
+	var actions: Array[Action] = []
+	if(!enemy.tags.has(EnemyState.Tag.HARMLESS)):
+		state.player.health -= 1
+		actions.append(PlayerDamageAction.new(state.player.health))
+	if(enemy.tags.has(EnemyState.Tag.HIT_AND_RUN)):
+		enemy.status[EnemyState.Status.RETREATING] = 3
+	if(enemy.tags.has(EnemyState.Tag.COOLDOWN)):
+		enemy.status[EnemyState.Status.RESTING] = 3
+	return actions
+	
 	
 static func _enemy_distance_sort(a: EnemyState, b: EnemyState, position: Vector2i) -> bool:
 	return MapState.gridDistance(a.position, position) > MapState.gridDistance(b.position, position)
 	
 static func _valid_enemy_move(state: GameState, enemy: EnemyState, pos: Vector2i) -> bool:
 	return (enemy.position != pos
-			and MapState.gridDistance(enemy.position, state.player.position) > 1
 			and (state.map.get_tile(pos) == &"Ground" or (enemy.tags.has(EnemyState.Tag.FLYING) and state.map.get_tile(pos) == &"Water"))
 			and not state.blocked_tile(pos))
 			
@@ -107,7 +106,7 @@ static func _select_enemy_dir(state: GameState, enemy: EnemyState) -> Vector2i:
 			#if they're the same, pick based on player's last move
 			# > : move along the same axis as the player did (more like Auro)
 			# < : move along the opposite axis as the player did (more "chasing")
-			if abs(state.player.last_move_dir.x) < abs(state.player.last_move_dir.y):
+			if abs(state.player.last_move_dir.x) > abs(state.player.last_move_dir.y):
 				dir = Vector2i(sign(playerDir).x, 0)
 			else:
 				dir = Vector2i(0, sign(playerDir).y)
@@ -115,18 +114,15 @@ static func _select_enemy_dir(state: GameState, enemy: EnemyState) -> Vector2i:
 		if enemy.status.has(EnemyState.Status.RETREATING):
 			dir = -dir
 			alternate = -alternate
-			print(enemy.name)
-			print("enemy retreating")
-			print(dir)
-			print(alternate)
-			enemy.status[EnemyState.Status.RETREATING] -= 1
-			if enemy.status[EnemyState.Status.RETREATING] < 1:
-				enemy.status.erase(EnemyState.Status.RETREATING)
 		
 		if not _valid_enemy_move(state, enemy, enemy.position+dir):
 			dir = alternate
 			
 		return dir
-
-	
+		
+static func _count_down_status(enemy: EnemyState, status: EnemyState.Status) -> void:
+	if enemy.status.has(status):
+		enemy.status[status] -= 1
+		if enemy.status[status] < 1:
+			enemy.status.erase(status)
 	
