@@ -58,9 +58,9 @@ func _process(_delta: float) -> void:
 	# Will this get complex enough later to justify state machine objects?
 	match input_state:
 		AWAITING_INPUT:
-			_recieve_input()
+			_receive_input()
 
-func _recieve_input() -> void:
+func _receive_input() -> void:
 	var tile = map.local_to_map(get_global_mouse_position())
 	
 	if(not PlayerState.validMove(tile, _history[-1].state)):
