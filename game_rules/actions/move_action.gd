@@ -1,4 +1,4 @@
-class_name BumpAction
+class_name MoveAction
 extends Action
 
 var _id: int
