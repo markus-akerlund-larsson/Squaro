@@ -13,7 +13,7 @@ static func player_bump(p_state: GameState, target: Vector2i) -> Update:
 	var endTile = enemy.position+dir
 	if state.blocked_tile(endTile): return null
 	enemy.position = endTile
-	if enemy.tags.has(Enemy.Tag.FLYING):
+	if enemy.tag.has(Enemy.Tag.FLYING):
 		if !state.blocked_tile(endTile+dir):
 			endTile += dir
 			enemy.position = endTile
@@ -21,7 +21,7 @@ static func player_bump(p_state: GameState, target: Vector2i) -> Update:
 	enemy.status[Enemy.Status.BUMPED] = 0
 	actions.append(BumpAction.new(enemy.id, endTile))
 	
-	if state.map.get_tile(endTile) == &"Water" and !enemy.tags.has(Enemy.Tag.FLYING):
+	if state.map.get_tile(endTile) == &"Water" and !enemy.tag.has(Enemy.Tag.FLYING):
 		state.enemies.erase(enemy)
 		state.map.set_tile(endTile, &"Ground")
 		actions.append(SinkEnemyAction.new(enemy.id, endTile))
