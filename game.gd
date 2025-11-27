@@ -74,7 +74,7 @@ func _receive_input() -> void:
 		if _history[-1].state.enemy_tile(tile):
 			var res = GameRules.player_bump(_history[-1].state, tile)
 			if res != null:
-				_history.append(GameRules.enemy_turn(res.actions, res.state))
+				_history.append(res)
 				input_state = RESOLVING_ACTIONS
 				for action in _history[-1].actions:
 					await action.execute(self)
@@ -89,7 +89,6 @@ func _receive_input() -> void:
 
 
 func _spawn_enemy(p_state: GameState, type: EnemySpec, pos: Vector2i) -> Update:
-	
 	var state = p_state.duplicate(true)
 	var scene = _enemyScene.instantiate()
 	enemiesNode.add_child(scene)

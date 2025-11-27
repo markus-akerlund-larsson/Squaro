@@ -26,7 +26,7 @@ static func player_bump(p_state: GameState, target: Vector2i) -> Update:
 		state.map.set_tile(endTile, &"Ground")
 		actions.append(SinkEnemyAction.new(enemy.id, endTile))
 	
-	return Update.new(actions, state)
+	return enemy_turn(actions, state)
 
 static func player_move(p_state: GameState, to: Vector2i) -> Update:
 	print("Player move to "+str(to))
