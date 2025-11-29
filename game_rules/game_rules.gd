@@ -21,6 +21,14 @@ static func player_bump(p_state: GameState, target: Vector2i) -> Update:
 	enemy.status[Enemy.Status.BUMPED] = 0
 	actions.append(BumpAction.new(enemy.id, endTile))
 	
+	var hit_fire = state.fire_at(endTile)
+	if hit_fire != null:
+		state.enemies.erase(enemy)
+		state.remove_fire(hit_fire)
+		actions.append(SinkEnemyAction.new(enemy.id, endTile))
+		actions.append(RemoveFireAction.new(hit_fire.id))
+		return enemy_turn(actions, state)
+	
 	if state.map.get_tile(endTile) == &"Water" and !enemy.tag.has(Enemy.Tag.FLYING):
 		state.enemies.erase(enemy)
 		state.map.set_tile(endTile, &"Ground")
@@ -31,10 +39,40 @@ static func player_bump(p_state: GameState, target: Vector2i) -> Update:
 static func player_move(p_state: GameState, to: Vector2i) -> Update:
 	print("Player move to "+str(to))
 	var state = p_state.duplicate(true)
-	
-	state.player.last_move_dir= to - state.player.position
-	state.player.position = to;
-	return enemy_turn([MoveAction.new(player_id, to)], state)
+	var actions: Array[Action] = []
+
+	state.player.last_move_dir = to - state.player.position
+	state.player.position = to
+	actions.append(MoveAction.new(player_id, to))
+
+	var fire = state.fire_at(to)
+	if fire != null:
+		state.player.health -= 1
+		actions.append(PlayerDamageAction.new(state.player.health))
+		
+		for dir in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.UP, Vector2i.DOWN]:
+			var enemy = state.enemy_at(to + dir)
+			if enemy == null: continue
+			
+			var end_tile = enemy.position + dir
+			if state.blocked_tile(end_tile):
+				continue
+			enemy.position = end_tile
+			if enemy.tag.has(Enemy.Tag.FLYING):
+				if !state.blocked_tile(end_tile + dir):
+					end_tile += dir
+					enemy.position = end_tile
+			enemy.status[Enemy.Status.BUMPED] = 0
+			actions.append(BumpAction.new(enemy.id, end_tile))
+			if state.map.get_tile(end_tile) == &"Water" and !enemy.tag.has(Enemy.Tag.FLYING):
+				state.enemies.erase(enemy)
+				state.map.set_tile(end_tile, &"Ground")
+				actions.append(SinkEnemyAction.new(enemy.id, end_tile))
+				
+		state.remove_fire(fire)
+		actions.append(RemoveFireAction.new(fire.id))
+
+	return enemy_turn(actions, state)
 	
 static func enemy_turn(actions: Array[Action], p_state: GameState) -> Update:
 	print("Enemy turn start")
@@ -89,6 +127,7 @@ static func _enemy_distance_sort(a: Enemy, b: Enemy, position: Vector2i) -> bool
 static func _valid_enemy_move(state: GameState, enemy: Enemy, pos: Vector2i) -> bool:
 	return (enemy.position != pos
 			and (state.map.get_tile(pos) == &"Ground" or (enemy.tag.has(Enemy.Tag.FLYING) and state.map.get_tile(pos) == &"Water"))
+			and state.fire_at(pos) == null
 			and not state.blocked_tile(pos))
 			
 static func _select_enemy_dir(state: GameState, enemy: Enemy) -> Vector2i:

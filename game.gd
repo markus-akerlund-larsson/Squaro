@@ -41,6 +41,16 @@ func _ready() -> void:
 	state.player.position = Vector2i(32, 38)
 	entities[GameRules.player_id] = player
 	player.position = map.map_to_local(state.player.position)
+	
+	#Setup fire
+	var fire_node = get_node("TileMapLayer/Fire")
+	var fire_state = Fire.new()
+	fire_state.id = _unused_id
+	_unused_id += 1
+	fire_state.position = Vector2i(33, 36)
+	entities[fire_state.id] = fire_node
+	fire_node.position = map.map_to_local(fire_state.position)
+	state.fires.append(fire_state)
 
 	# Setup enemies
 	_enemies = {
@@ -49,7 +59,7 @@ func _ready() -> void:
 		&"Bat": load("res://enemies/bat.tres"),
 	}
 	state = _spawn_enemy(state, _enemies[&"Rat"], Vector2i(31, 33)).state
-	state = _spawn_enemy(state, _enemies[&"KissyRat"], Vector2i(33, 34)).state
+	state = _spawn_enemy(state, _enemies[&"KissyRat"], Vector2i(34, 36)).state
 	state = _spawn_enemy(state, _enemies[&"Bat"], Vector2i(32, 33)).state
 	_history.append(Update.new([], state))
 
