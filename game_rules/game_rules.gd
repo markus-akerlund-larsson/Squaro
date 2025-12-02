@@ -84,22 +84,20 @@ static func enemy_turn(actions: Array[Action], p_state: GameState) -> Update:
 	for enemy: Enemy in state.enemies:
 		# Enemy turn logic goes here
 		
-		var dir = _select_enemy_dir(state, enemy)
-		
+		var moves = 1
+		if enemy.tag.has(Enemy.Tag.FLYING):
+			moves = 2
+		if (enemy.status.has(Enemy.Status.RESTING)
+			or enemy.status.has(Enemy.Status.BUMPED)
+			or enemy.status.has(Enemy.Status.FROZEN)):
+			moves = 0
+			
 		if Map.gridDistance(state.player.position, enemy.position) == 1:
 			actions.append_array(_enemy_attack(state, enemy))
 		
-		if enemy.status.has(Enemy.Status.RESTING):
-			dir = Vector2i.ZERO
-		
-		if _valid_enemy_move(state, enemy, enemy.position+dir) and not enemy.status.has(Enemy.Status.BUMPED):
-			enemy.position += dir
-			actions.append(MoveAction.new(enemy.id, enemy.position))
-			
-		if enemy.tag.has(Enemy.Tag.FLYING) and not enemy.status.has(Enemy.Status.BUMPED):
-			dir = _select_enemy_dir(state, enemy)
+		for move in moves:
+			var dir = _select_enemy_dir(state, enemy)
 			if _valid_enemy_move(state, enemy, enemy.position+dir):
-				print(str(dir))
 				enemy.position += dir
 				actions.append(MoveAction.new(enemy.id, enemy.position))
 				
