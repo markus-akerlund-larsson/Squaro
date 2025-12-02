@@ -10,29 +10,32 @@ static func player_bump(p_state: GameState, target: Vector2i) -> Update:
 	var enemy = state.enemy_at(target)
 	var dir = enemy.position - state.player.position
 	
-	var endTile = enemy.position+dir
-	if state.blocked_tile(endTile): return null
-	enemy.position = endTile
+	var end_tile = enemy.position+dir
+	var tiles: Array[Vector2i] = []
+	if state.blocked_tile(end_tile): return null
+	enemy.position = end_tile
+	tiles.append(end_tile)
 	if enemy.tag.has(Enemy.Tag.FLYING):
-		if !state.blocked_tile(endTile+dir):
-			endTile += dir
-			enemy.position = endTile
+		if !state.blocked_tile(end_tile+dir):
+			end_tile = end_tile+dir
+			enemy.position = end_tile
+			tiles.append(end_tile)
 		
 	enemy.status[Enemy.Status.BUMPED] = 0
-	actions.append(BumpAction.new(enemy.id, endTile))
+	actions.append(BumpAction.new(enemy.id, end_tile))
+	for tile in tiles:
+		var hit_fire = state.fire_at(tile)
+		if hit_fire != null and state.enemies.has(enemy):
+			state.enemies.erase(enemy)
+			state.fires.erase(hit_fire)
+			actions.append(SinkEnemyAction.new(enemy.id, tile))
+			actions.append(RemoveFireAction.new(hit_fire.id))
+
 	
-	var hit_fire = state.fire_at(endTile)
-	if hit_fire != null:
+	if state.map.get_tile(end_tile) == &"Water" and !enemy.tag.has(Enemy.Tag.FLYING):
 		state.enemies.erase(enemy)
-		state.fires.erase(hit_fire)
-		actions.append(SinkEnemyAction.new(enemy.id, endTile))
-		actions.append(RemoveFireAction.new(hit_fire.id))
-		return enemy_turn(actions, state)
-	
-	if state.map.get_tile(endTile) == &"Water" and !enemy.tag.has(Enemy.Tag.FLYING):
-		state.enemies.erase(enemy)
-		state.map.set_tile(endTile, &"Ground")
-		actions.append(SinkEnemyAction.new(enemy.id, endTile))
+		state.map.set_tile(end_tile, &"Ground")
+		actions.append(SinkEnemyAction.new(enemy.id, end_tile))
 	
 	return enemy_turn(actions, state)
 
