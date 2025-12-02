@@ -37,6 +37,3 @@ func fire_at(tile: Vector2i) -> Fire:
 		if f.position == tile:
 			return f
 	return null
-
-func remove_fire(fire: Fire) -> void:
-	fires.erase(fire)

@@ -24,7 +24,7 @@ static func player_bump(p_state: GameState, target: Vector2i) -> Update:
 	var hit_fire = state.fire_at(endTile)
 	if hit_fire != null:
 		state.enemies.erase(enemy)
-		state.remove_fire(hit_fire)
+		state.fires.erase(hit_fire)
 		actions.append(SinkEnemyAction.new(enemy.id, endTile))
 		actions.append(RemoveFireAction.new(hit_fire.id))
 		return enemy_turn(actions, state)
